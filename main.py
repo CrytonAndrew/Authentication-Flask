@@ -37,7 +37,7 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template("index.html", logged_in=current_user.is_authenticated)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -59,7 +59,8 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
-        return render_template("secrets.html", name=new_user.name)
+        login_user(new_user)
+        return render_template("secrets.html", name=new_user.name, logged_in=current_user.is_authenticated)
     return render_template("register.html")
 
 
@@ -80,14 +81,14 @@ def login():
             return render_template(url_for("secrets.html", name=user_login.name))
 
         flash("Incorrect Password or email")
-    return render_template("login.html")
+    return render_template("login.html", logged_in=current_user.is_authenticated)
 
 
 @app.route('/secrets')
 @login_required
 def secrets():
     print(current_user.name)
-    return render_template("secrets.html", name=current_user.name)
+    return render_template("secrets.html", name=current_user.name, logged_in=True)
 
 
 @app.route('/logout')
@@ -99,7 +100,7 @@ def logout():
 @app.route('/download')
 @login_required
 def download():
-    return send_from_directory("static", filename="files/cheat_sheet.pdf")
+    return send_from_directory("static", filename="files/cheat_sheet.pdf", logged_in=True)
 
 
 if __name__ == "__main__":
